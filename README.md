@@ -3,8 +3,17 @@
 
 In the project directory, first install all the dependencies required using the command:
 
+#### Check update. 
+
 ```bash
-npm ci
+npx npm-check-updates -u
+```
+#### Run
+```bash
+npm install
+```
+```bash
+npm install --legacy-peer-deps
 ```
 Once done, create a .env file inside the project directory (or you can simply rename the `dev.env` file to `.env` file) and add the following variables.
 ```bash
@@ -16,7 +25,7 @@ Once done, enter your own API key in place of YOUR-API-KEY. You can enter your o
 
 Once this is done, you are good to do.
 
-To run this project enter the following command,
+ #### To run this project enter the following command,
 ```bash
 npm run start
 ```
