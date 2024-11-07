@@ -192,7 +192,7 @@ const Create = () => {
       formDatatoSend.append("external_url", externalUrl);
       formDatatoSend.append("max_supply", maxSupply);
       formDatatoSend.append("royalty", royalty);
-      formDatatoSend.append("file", file);
+      formDatatoSend.append("file", file);      
 
       axios({
         // Endpoint to send files
