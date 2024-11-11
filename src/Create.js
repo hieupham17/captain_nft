@@ -10,7 +10,7 @@ import { useNavigate  } from "react-router-dom";
 import { WalletContext } from "./Context/WalletContext";
 import file1 from "./resources/images/inner-box.png";
 import CreateLoader from "./Loaders/CreateLoader";
-// import {confirmTransactionFromFrontend} from './utility/shyft';
+import {confirmTransactionFromFrontend} from './utility/shyft';
 import { signAndConfirmTransaction } from "./utility/common";
 import SuccessLoader from "./Loaders/SuccessLoader";
 
@@ -79,12 +79,6 @@ const Create = () => {
       setSuccessful(false);
     }
 
-    
-      
-    //console.log("minted: ",minted);
-    //setComMinted(true);
-   
-
   }
   useEffect(() => {
     if(compleMint === true)
@@ -102,44 +96,37 @@ const Create = () => {
     let attrib_error = 0;
     let maxSupp_error = 0;
     let royalty_error = 0;
-
-
-    if(!name)
-    {
-      setNameErr("This field cannot be empty");
+  
+    // Kiểm tra các trường bắt buộc
+    if (!name) {
+      setNameErr("Trường này không được để trống!");
       name_err = 1;
     }
-    if(!symbol)
-    {
-      setSymErr("This field cannot be empty");
+    if (!symbol) {
+      setSymErr("Trường này không được để trống!");
       sym_error = 1;
     }
-    if(!desc)
-    {
-      setDescErr("This field cannot be empty");
+    if (!desc) {
+      setDescErr("Trường này không được để trống!");
       desc_error = 1;
     }
-    if(!file)
-    {
-      setFileErr("Please select a file");
+    if (!file) {
+      setFileErr("Trường này không được để trống!");
       file_error = 1;
     }
-    if(royalty<0 || royalty>100)
-    {
+    if (royalty < 0 || royalty > 100) {
       royalty_error = 1;
-      setErrorRoy("Value should be between 0 to 100");
+      setErrorRoy("Giá trị phải nằm trong khoảng từ 0 đến 100!");
     }
-    if(maxSupply<0)
-    {
+    if (maxSupply == null || maxSupply < 1) {
       maxSupp_error = 1;
-      setErrMaxSup("Should be a number greater than 1");
+      setErrMaxSup("Phải là một số lớn hơn 1!");
     }
-    if (
-      attribs[0].id === "5" &&
-      attribs[0].trait_type === "" &&
-      attribs[0].value === ""
-    ) {
-      setAttribErr("Attributes should have a trait_type and value, it should not be Empty");
+  
+    // Kiểm tra trường attributes
+    if (attribs.length > 0 && attribs[0].id === "5" && attribs[0].trait_type === "" && attribs[0].value === "") {
+      setAttribErr("Thuộc tính phải có trait_type và giá trị, không được để trống!");
+      attrib_error = 1;
     } else {
       let flag = 0;
       attribs.forEach((element) => {
@@ -147,124 +134,69 @@ const Create = () => {
           flag = 1;
         }
       });
-      if(flag === 1)
-      {
-        setAttribErr("Attribute cannot be empty");
+      if (flag === 1) {
+        setAttribErr("Trường này không được để trống!");
         attrib_error = 1;
       }
     }
-    
-
-    if(name_err || sym_error || desc_error || file_error || attrib_error || royalty_error || maxSupp_error)
-    {
-      setMainErr("Please fill all the required fields");
-    }
-    else
-    {
+  
+    // Kiểm tra lỗi tổng thể
+    if (name_err || sym_error || desc_error || file_error || attrib_error || royalty_error || maxSupp_error) {
+      setMainErr("Vui lòng điền đầy đủ các trường!");
+    } else {
       setloading(true);
-
+  
+      // Chuyển đổi attribs sang đối tượng nếu cần
       let my_obj = attribs.reduce(function (obj, elem) {
         obj[elem.trait_type] = elem.value;
         return obj;
       }, {});
-      console.warn(my_obj);
-      console.error(typeof my_obj);
-      console.log(typeof JSON.stringify(my_obj));
-      // return;
+  
+      // Thiết lập FormData
       let formDatatoSend = new FormData();
       formDatatoSend.append("network", network);
-      //formDatatoSend.append("private_key", privKey);
       formDatatoSend.append("wallet", walletId);
       formDatatoSend.append("name", name);
       formDatatoSend.append("symbol", symbol);
       formDatatoSend.append("description", desc);
-      // formDatatoSend.append(
-      //   "attributes",
-      //   JSON.stringify([
-      //     {
-      //       trait_type: "edification",
-      //       value: "100",
-      //     },
-      //   ])
-      // );
-      formDatatoSend.append("attributes", JSON.stringify(attribs));
-      //formDatatoSend.append("share", share);
+      formDatatoSend.append("attributes", JSON.stringify(my_obj)); // Sử dụng my_obj nếu server yêu cầu
       formDatatoSend.append("external_url", externalUrl);
       formDatatoSend.append("max_supply", maxSupply);
       formDatatoSend.append("royalty", royalty);
       formDatatoSend.append("file", file);
-
+  
       axios({
-        // Endpoint to send files
         url: `${endPoint}nft/create_detach`,
         method: "POST",
         headers: {
           "Content-Type": "multipart/form-data",
           "x-api-key": xKey,
           Accept: "*/*",
-          "Access-Control-Allow-Origin": "*",
         },
-
-        // Attaching the form data
         data: formDatatoSend,
       })
-        // Handle the response from backend here
         .then(async (res) => {
           console.log(res);
-          if(res.data.success === true)
-          {
+          if (res.data.success === true) {
             const transaction = res.data.result.encoded_transaction;
             setMinted(res.data.result.mint);
-            const ret_result = await signAndConfirmTransaction(network,transaction,callback);
+            const ret_result = await signAndConfirmTransaction(network, transaction, callback);
             console.log(ret_result);
-            
-            //const minted = res.data.result.mint;
             setSuccessful(true);
-            // setTimeout((()=>{
-            //   if(minted)
-            //     navigate(`/get-details?token_address=${minted}&network=${network}`); 
-            //   else
-            //     navigate('/'); 
-            // }),15000);
-            
-          }
-          else
-          {
+          } else {
             setMainErr(res.data.message);
-            setloading(false);
           }
-          
-            //console.log("trans: ",transaction);
-            //const network = "devnet";
-            //const phantom = new PhantomWalletAdapter();
-            //await phantom.disconnect();
-            // await phantom.connect();
-            // const rpcUrl = clusterUrl(network);
-            // const connection = new Connection(rpcUrl,"confirmed");
-            // console.log(connection.rpcEndpoint);
-            // const ret = await confirmTransactionFromFrontend(connection,transaction,phantom);
-            // const checks = await connection.confirmTransaction({signature:ret},'finalised');
-            // console.log(ret);
-            // console.log(checks);
-          
-          // if(res.data.success === true)
-          // {
-          //   if(walletId!==null)
-          //     navigate(`/wallet/${walletId}`); 
-          //   else
-          //     navigate('/') 
-          // }
+          setloading(false); // Đặt lại loading khi kết thúc xử lý
         })
-
-        // Catch errors if any
         .catch((err) => {
           console.warn(err);
-          console.log(err.message)
+          console.log(err.response?.data || err.message);
           setMainErr(err.message);
-          setloading(false);
+          setloading(false); // Đặt lại loading khi gặp lỗi
         });
-    }    
+    }
   };
+  
   
   const remField = (index) => {
     
@@ -280,36 +212,13 @@ const Create = () => {
         {
           successful && <SuccessLoader />
         }
-      <div className="right-al-container">
-        {/* {isLoading && (
-          <div
-            className="card mx-auto text-center d-flex justify-content-center text-light"
-            style={{
-              width: "130px",
-              height: "50px",
-              backgroundColor: "green",
-              borderRadius: "10px",
-              padding: "20px",
-              position: "fixed",
-              zIndex: "10",
-              top: "10%",
-              left: "50%",
-            }}
-          >
-            <span className="loading-text">
-              Loading <i className="fas fa-circle-notch fa-spin"></i>
-            </span>
-          </div>
-        )} */}
-        
+      <div className="right-al-container">       
         <div className="container-lg mint-single">
           <div className="row page-heading-container">
             <div className="col-sm-12 col-md-8">
               <h2 className="section-heading">Create Master NFT</h2>
             </div>
           </div>
-          {/* <form onSubmit={handleSubmit(onSubmit)}> */}
-
           <form>
             <div className="row">
               <div className="col-sm-12 col-md-5">
@@ -404,21 +313,6 @@ const Create = () => {
                       />
                       <small className="error-msg">{symErr}</small>
                     </div>
-                    {/* <div className="white-form-group">
-                      <label className="form-label" htmlFor="name">
-                        Private Key*
-                      </label>
-
-                      <input
-                        type="text"
-                        name="privKey"
-                        value={privKey}
-                        onChange={(e) => setprivKey(e.target.value)}
-                        className="form-control"
-                        placeholder="Enter Private Key"
-                        required
-                      />
-                    </div> */}
                     <div className="white-form-group">
                       <label className="form-label" htmlFor="maxSupply">
                         Max Supply*
