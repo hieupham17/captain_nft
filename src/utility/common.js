@@ -27,7 +27,7 @@ export async function connectTheWallet()
         if(wallet.address)
         {
             const accountInfo = await connection.getAccountInfo(new PublicKey(wallet.address),"confirmed");
-            console.log(accountInfo); 
+            console.log('accountInfo ',accountInfo); 
             res.success = true;
             res.message = "Wallet connected successfully";
             res.addr = wallet.address;
@@ -47,39 +47,11 @@ export async function signAndConfirmTransaction(network,transaction,callback)
     await phantom.connect();
     const rpcUrl = clusterUrl(network);
     const connection = new Connection(rpcUrl,"confirmed");
-    //console.log(connection.rpcEndpoint);
     const ret = await confirmTransactionFromFrontend(connection,transaction,phantom);
-    // const checks = await connection.confirmTransaction({signature:ret},'finalised');
     console.log(ret);
-    // console.log(checks);
-    // await connection.confirmTransaction({
-    //     blockhash: transaction.blockhash,
-    //     signature: ret,
-    //   });
     connection.onSignature(ret,callback,'finalized')
     return ret;
 }
-// export async function signAndConfirmTransactions(network,transactions,callback)
-// {
-//     const phantom = new PhantomWalletAdapter();
-//     await phantom.connect();
-//     const rpcUrl = clusterUrl(network);
-//     const connection = new Connection(rpcUrl,"confirmed");
-//     //console.log(connection.rpcEndpoint);
-//     var ret = "";
-//     await transactions.forEach(async (transaction,index) => {
-//         ret = await confirmTransactionFromFrontend(connection,transaction,phantom);
-        
-//         if(index === (transactions.length - 1))
-//         {
-//             connection.onSignature(ret,callback,'finalized')
-//             return ret;
-//         }
-//     });
-//     // console.log("Signing Complete");
-//     // return "Signing Complete";
-    
-// }
 export async function signAndConfirmTransactions(network,transactions,callback)
 {
     const phantom = new PhantomWalletAdapter();
@@ -87,8 +59,6 @@ export async function signAndConfirmTransactions(network,transactions,callback)
     const rpcUrl = clusterUrl(network);
     const connection = new Connection(rpcUrl,"confirmed");
     const ret = await confirmTransactionsFromFrontend(connection,transactions,phantom);
-    // console.log("After return");
-    // console.log(ret);
     console.log("Finalizing Transaction");
     connection.onSignature(ret[0],callback,'finalized')
     return ret;
