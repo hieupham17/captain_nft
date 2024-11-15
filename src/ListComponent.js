@@ -64,7 +64,6 @@ const ListAll = () => {
         })
           // Handle the response from backend here
           .then((res) => {
-            console.log(res.data);
             if(res.data.success === true)
             {
               setGotListings(res.data.result);
@@ -82,7 +81,6 @@ const ListAll = () => {
   },[]);
 
   useEffect(()=>{
-    console.log("Got Listings: ",got_listings);
     if(got_listings!=null)
     {
       let arr_listng = [];
@@ -235,20 +233,15 @@ const ListAll = () => {
                 {
                   
                   setFailedModal(true);
-                  //setShowLister(false);
                 }
                 
               })
-              // Catch errors if any
               .catch((err) => {
-                console.warn(err);
                 setErrMessg(err.message);
                 setIsListing(false);
                 setFailedModal(true);
                 setShowLister(false);
-                // navigate(`/my-listings`);
                 setListingPrice(0);
-                //setShowLister(false);
               });
         }
         
