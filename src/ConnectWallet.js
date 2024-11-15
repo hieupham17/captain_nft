@@ -1,24 +1,65 @@
 import { useContext } from "react";
-//import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { connectTheWallet } from "./utility/common";
-//import { DomainContext } from "./Context/DomainContext";
 import { WalletContext } from "./Context/WalletContext";
-//import { NetworkContext } from "./Context/NetworkContext";
 import { ReactSession } from "react-client-session";
 
 const ConnectWallet = () => {
     const navigate = useNavigate();
     const { setWalletId } = useContext(WalletContext);
+
     const solanaConnect = async () => {
-        ReactSession.set("connected_wallet", '');
-        console.log('clicked solana connect');
-        const resp = await connectTheWallet();
-        //console.log(resp);
-        ReactSession.set("connected_wallet", resp.addr);
-        setWalletId(resp.addr);
-        navigate('/wallet/' + resp.addr);
-    }
+        try {
+            // Xóa session trước khi kết nối
+            ReactSession.set("connected_wallet", '');
+            console.log('clicked solana connect');
+
+            // Kết nối ví
+            const resp = await connectTheWallet();
+            if (!resp || !resp.addr) {
+                console.error('Failed to connect wallet or address is undefined');
+                return;
+            }
+
+            // Lưu thông tin ví vào session
+            ReactSession.set("connected_wallet", resp.addr);
+            setWalletId(resp.addr);
+
+            // Gọi API để lấy referenceId
+            const url = `https://api.gameshift.dev/nx/users/${resp.addr}`;
+            const options = {
+                method: 'GET',
+                headers: {
+                    accept: 'application/json',
+                    'x-api-key': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiI4MzUzMDc0NC0zMDVlLTRhMzAtOTVkMi1mMjRhOTYzNDIzMTIiLCJzdWIiOiIwZGFhZDYxYi05NGYxLTRjZGMtODk1ZS1iMGE0MTliMjBlNTIiLCJpYXQiOjE3MzEzOTk0NjZ9.1oHCpFqI5OkjOH2GK9EyQTU6oo9ii6GsXfOybq7M7xM'
+                }
+            };
+
+            const apiResponse = await fetch(url, options);
+            if (!apiResponse.ok) {
+                console.error('Failed to fetch referenceId:', apiResponse.statusText);
+                return;
+            }
+
+            const data = await apiResponse.json();
+            console.log('API Response:', data);
+
+            const referenceId = data.referenceId; 
+            if (referenceId) {
+                // Lưu referenceId vào session
+                ReactSession.set("referenceId", referenceId);
+                console.log('Reference ID:', referenceId);
+
+                // Điều hướng tới trang ví cùng với referenceId
+                navigate(`/wallet/${resp.addr}?ref=${referenceId}`);
+            } else {
+                console.error('No referenceId found in API response');
+            }
+        } catch (error) {
+            console.error('Error during solanaConnect:', error);
+        }
+    };
+
     return (
         <div>
             <div className="right-al-container mb-2">
@@ -28,24 +69,12 @@ const ConnectWallet = () => {
                             <h2 className="section-heading" style={{ marginTop: "60px", marginBottom: "20px" }}>Explore, Create and Update your Nfts</h2>
                             <p className="p-para-light" style={{ marginTop: "30px", marginBottom: "50px", fontSize: "1.2em" }}>Connect, share the link and flaunt your collection.</p>
                             <button className="btn-solid-grad" onClick={solanaConnect}>Connect Wallet</button>
-                            {/* <p className="p-para-light" style={{ marginTop: "30px",marginBottom: "50px", fontSize: "1.2em" }}>Or, you can just enter your wallet address.</p> */}
-                            {/* <div className="white-form-group">
-                        <input
-                          type="text"
-                          name="privKey"
-                          value={privKey}
-                          onChange={(e) => setprivKey(e.target.value)}
-                          className="form-control"
-                          placeholder="Enter Private Key"
-                          required
-                        />
-                        </div> */}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
-}
+};
 
 export default ConnectWallet;

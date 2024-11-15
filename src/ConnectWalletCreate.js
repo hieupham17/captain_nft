@@ -12,9 +12,7 @@ const ConnectWalletCreate = (props) => {
     const { setWalletId } = useContext(WalletContext);
     const solanaConnect = async () => {
         ReactSession.set("connected_wallet", '');
-        console.log('clicked solana connect');
         const resp = await connectTheWallet();
-        //console.log(resp);
         ReactSession.set("connected_wallet", resp.addr);
         setWalletId(resp.addr);
         navigate(props.navigateTo);

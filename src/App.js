@@ -7,10 +7,6 @@ import { DomainContext } from "./Context/DomainContext";
 import { WalletContext } from "./Context/WalletContext";
 import { NetworkContext } from "./Context/NetworkContext";
 
-// import './resources/css/styles.css';
-// import './resources/css/responsive-medium.css';
-// import './resources/css/responsive-small.css';
-// import './resources/css/responsive-xsmall.css';
 import './resources/css/Home.css';
 import './resources/css/Home-responsive.css';
 
