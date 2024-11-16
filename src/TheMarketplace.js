@@ -12,7 +12,6 @@ import FetchLoaderGen from "./Loaders/FetchLoaderGen";
 
 const TheMarketplace = () => {
   const navigate = useNavigate();
-  //const { waddress } = useParams();
   const network = "devnet";
   const [loaded, setLoaded] = useState(false);
   const [nfts, setNfts] = useState(null);
@@ -20,8 +19,6 @@ const TheMarketplace = () => {
 
   const { walletId, setWalletId } = useContext(WalletContext);
 
-
-  //code for buy
   const net = "devnet";
   const [selWall,setSelWall] = useState();
   const [price,setPrice] = useState(0);
@@ -46,12 +43,10 @@ const TheMarketplace = () => {
         setTimeout(() => {
           navigate(`/wallet/${walletId}`);
         }, 5000);
-        //navigate(`/wallet/${walletId}`);
       }
       else
       {
         console.log('failed');
-        //navigate(`/wallet/${walletId}`);
         setFailedModal(true);
         setLoadingConf(false);
       }
@@ -61,11 +56,8 @@ const TheMarketplace = () => {
       setOkModal(false);
       setFailedModal(true);
       setLoadingConf(false);
-      //navigate(`/wallet/${walletId}`);
     }
-    
   }
-
 
   const buyList = (nftAddr,seller_wallet,price) => {
     setSelWall(seller_wallet);
@@ -82,11 +74,9 @@ const TheMarketplace = () => {
         const endPoint = process.env.REACT_APP_URL_EP;
         const marketplaceAddress = process.env.REACT_APP_MARKPLACE;
         
-        
         let nftUrl = `${endPoint}marketplace/buy`;
 
         axios({
-            // Endpoint to list
             url: nftUrl,
             method: "POST",
             headers: {
@@ -103,7 +93,6 @@ const TheMarketplace = () => {
                 
             }
           })
-            // Handle the response from backend here
             .then(async (res) => {
               console.log(res.data);
               setIsBuying(false);
@@ -120,32 +109,18 @@ const TheMarketplace = () => {
               }
               
             })
-            // Catch errors if any
             .catch((err) => {
               console.warn(err);
               setErrorMsgBuy(err.message);
               setIsBuying(false);
               setOkModal(false);
               setFailedModal(true);
-              // setSure(false);
             });
   }
 
   const closePopupList = () => {
     setSure(false);
   }
-
-  // useEffect(() => {
-  //     if (!walletId) {
-  //         console.log('Wallet Not connected')
-  //         navigate('/');
-  //     }
-  //     // else {
-  //     //     setWalletId(waddress);
-  //     // }
-  // }, []);
-
-  //Required Code to fetch data from the marketplace
   useEffect(() => {
       const xKey = process.env.REACT_APP_API_KEY;
       const endPoint = process.env.REACT_APP_URL_EP;
@@ -163,7 +138,6 @@ const TheMarketplace = () => {
             "x-api-key": xKey,
           },
         })
-          // Handle the response from backend here
           .then((res) => {
             console.log(res.data);
             if(res.data.success === true)

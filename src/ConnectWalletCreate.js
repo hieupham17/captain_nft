@@ -3,9 +3,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { connectTheWallet } from "./utility/common";
 import { ReactSession } from "react-client-session";
-//import { DomainContext } from "./Context/DomainContext";
 import { WalletContext } from "./Context/WalletContext";
-//import { NetworkContext } from "./Context/NetworkContext";
 
 const ConnectWalletCreate = (props) => {
     const navigate = useNavigate();
