@@ -109,10 +109,8 @@ const Create = () => {
       if (json.id) {
         setItemId(json.id); // Lưu id
         console.log("NFT ID: ", json.id); // Log id để kiểm tra
-  
         // Lưu ID vào localStorage
         localStorage.setItem('nftId', json.id); // Lưu id vào localStorage
-  
       } else {
         console.error("ID không tồn tại trong phản hồi:", json);
         setMainErr("API không trả về ID.");
