@@ -23,6 +23,7 @@ const SideNav = () => {
 
     const xKey = process.env.REACT_APP_API_KEY;
 
+
   const openNav = () => {
     document.getElementById("mySidenav").style.width = "250px";
     setOpen(false);

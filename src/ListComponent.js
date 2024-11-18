@@ -24,6 +24,7 @@ const ListAll = () => {
         'x-api-key': xKey
       }
     };
+    console.log("Current NFTs state:", nfts);
 
     fetch(url, options)
       .then(res => res.json())
@@ -37,7 +38,6 @@ const ListAll = () => {
               description: item.item.description,
               imageUrl: item.item.imageUrl
             }));
-
           if (filteredNfts.length > 0) {
             setNfts(filteredNfts);
             setLoaded(true);
@@ -85,8 +85,8 @@ const ListAll = () => {
         } else {
           alert("Asset is already listed for sale");
         }
-        setSellingNft(null); // Đóng form sau khi xử lý xong
-        setPrice(''); // Reset giá
+        setSellingNft(null); 
+        setPrice(''); 
       })
       .catch(err => {
         console.error(err);
