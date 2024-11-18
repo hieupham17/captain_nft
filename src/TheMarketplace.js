@@ -1,11 +1,29 @@
 import React, { useState, useEffect } from 'react';
+import { Connection, PublicKey } from '@solana/web3.js';
 
 const TheMarketplace = () => {
   const [nftsForSale, setNftsForSale] = useState([]); // NFT đã được ký bán
   const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
   const [message, setMessage] = useState(""); // Thông báo lỗi hoặc trạng thái
-
+  const [buyerId, setBuyerId] = useState(''); // Giả sử bạn đã có buyerId từ ví Phantom
+  const [isWalletConnected, setIsWalletConnected] = useState(false); // Trạng thái ví kết nối
   const xKey = process.env.REACT_APP_API_KEY;
+
+  // Kiểm tra kết nối ví Phantom và lấy địa chỉ ví
+  const checkPhantomWallet = async () => {
+    if (window.solana && window.solana.isPhantom) {
+      try {
+        const response = await window.solana.connect(); // Kết nối ví Phantom
+        setBuyerId(response.publicKey.toString()); // Lưu địa chỉ ví vào buyerId
+        setIsWalletConnected(true); // Đánh dấu ví đã được kết nối
+        setMessage("Wallet connected.");
+      } catch (err) {
+        setMessage("Please connect your Phantom wallet.");
+      }
+    } else {
+      setMessage("Phantom wallet not detected.");
+    }
+  };
 
   // Fetch dữ liệu NFT đã ký bán từ API
   useEffect(() => {
@@ -61,7 +79,42 @@ const TheMarketplace = () => {
         setLoading(false);
       });
   }, []); 
-  
+
+  // Hàm mua NFT
+  const handleBuyNFT = (itemId) => {
+    if (!buyerId) {
+      setMessage("Please connect your Phantom wallet first.");
+      return;
+    }
+
+    const url = `https://api.gameshift.dev/nx/unique-assets/${itemId}/buy`;
+    const options = {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'x-api-key': process.env.REACT_APP_API_KEY, // Lấy từ env hoặc hardcode
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ buyerId: buyerId }) // Gửi buyerId từ ví người dùng
+    };
+
+    fetch(url, options)
+      .then(res => res.json())
+      .then(json => {
+        console.log("Mua thành công:", json);
+        if (json.transactionId && json.consentUrl) {
+          // Chuyển hướng người dùng đến trang consentUrl để ký mua
+          window.location.href = json.consentUrl;
+        } else {
+          setMessage("An error occurred while processing the purchase.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setMessage("An error occurred while purchasing the NFT.");
+      });
+  };
+
   return (
     <div style={styles.container}>
       <h3>The Marketplace</h3>
@@ -78,12 +131,24 @@ const TheMarketplace = () => {
               <h3>{nft.name}</h3>
               <p>{nft.description}</p>
               <p>Price: {nft.price} USDC</p>
+              {/* Nút mua */}
+              <button 
+                onClick={() => handleBuyNFT(nft.id)} 
+                style={styles.buyButton}
+              >
+                Buy
+              </button>
             </div>
           ))
         ) : (
           <p>No NFTs are listed for sale with escrow and price.</p>
         )}
       </div>
+
+      {/* Nút kết nối ví Phantom */}
+      <button onClick={checkPhantomWallet} style={styles.connectButton}>
+        {isWalletConnected ? 'Wallet Connected' : 'Connect Phantom Wallet'}
+      </button>
     </div>
   );
 };
@@ -122,6 +187,24 @@ const styles = {
     height: 'auto',
     borderRadius: '8px',
     marginBottom: '15px',
+  },
+  buyButton: {
+    padding: '10px 15px',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    marginTop: '10px',
+  },
+  connectButton: {
+    padding: '10px 20px',
+    backgroundColor: '#ff9b00',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    marginTop: '20px',
   },
 };
 
