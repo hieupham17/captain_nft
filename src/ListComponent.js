@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const ListAll = () => {
   const [nfts, setNfts] = useState([]);
@@ -6,8 +8,12 @@ const ListAll = () => {
   const [mssg, setMssg] = useState("");
   const [sellingNft, setSellingNft] = useState(null); // NFT đang được bán
   const [price, setPrice] = useState(''); // Giá nhập vào
+  const [selectedNft, setSelectedNft] = useState(null); // NFT chi tiết
+
+  const [searchTerm, setSearchTerm] = useState(""); // State for search input
 
   const xKey = process.env.REACT_APP_API_KEY;
+  const navigate = useNavigate();
 
   useEffect(() => {
     const url = 'https://api.gameshift.dev/nx/items';
@@ -25,7 +31,7 @@ const ListAll = () => {
       .then(json => {
         if (json && json.data && Array.isArray(json.data)) {
           const filteredNfts = json.data
-            .filter(item => item.type === 'UniqueAsset') // Lọc chỉ những tài sản UniqueAsset
+            .filter(item => item.type === 'UniqueAsset')
             .map(item => ({
               id: item.item.id,
               name: item.item.name,
@@ -50,7 +56,11 @@ const ListAll = () => {
         setLoaded(true);
       });
   }, []);
-  
+
+  const handleViewDetail = (nft) => {
+    navigate(`/nft-detail/${nft.id}`);
+};
+
 
   // Hàm xử lý API bán NFT
   const handleSell = (nftId) => {
@@ -64,15 +74,13 @@ const ListAll = () => {
       },
       body: JSON.stringify({ price: { currencyId: 'USDC', naturalAmount: price } })
     };
-  
+
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
         console.log(json);
         if (json.consentUrl) {
-          // Điều hướng đến consentUrl
           window.location.href = json.consentUrl;
-          // Chỉ sau khi xác nhận thành công thì loại bỏ NFT khỏi danh sách
           setNfts(prevNfts => prevNfts.filter(nft => nft.id !== nftId));
         } else {
           alert("Asset is already listed for sale");
@@ -85,63 +93,152 @@ const ListAll = () => {
         alert("Failed to list NFT for sale.");
       });
   };
-  
-  return (
-    <div style={styles.container}>
-      <h3 style={styles.title}>My NFTs</h3>
-      {!loaded && <p>Loading...</p>}
-      {mssg && <p style={styles.message}>{mssg}</p>}
+ // Filter NFTs based on search term
+ const filteredNfts = nfts.filter(
+  (nft) =>
+    nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    nft.description.toLowerCase().includes(searchTerm.toLowerCase())
+);
 
-      <div style={styles.nftList}>
-        {nfts.length > 0 ? (
-          nfts.map((nft, index) => (
-            <div key={index} style={styles.nftItem}>
-              <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
-              <h3 style={styles.nftName}>{nft.name}</h3>
-              <p style={styles.nftDescription}>{nft.description}</p>
-              <button
-                style={styles.sellButton}
-                onClick={() => setSellingNft(nft.id)} // Mở form bán
-              >
-                Sell
-              </button>
-              {sellingNft === nft.id && (
-                <div style={styles.sellForm}>
-                  <input
-                    type="number"
-                    placeholder="Enter price"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    style={styles.priceInput}
-                  />
-                  <button onClick={() => handleSell(nft.id)} style={styles.confirmButton}>
-                    Confirm
-                  </button>
-                  <button onClick={() => setSellingNft(null)} style={styles.cancelButton}>
-                    Cancel
-                  </button>
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <p>No NFTs available</p>
-        )}
-      </div>
+return (
+  <div style={styles.container}>
+    <h3 style={styles.title}>My NFTs</h3>
+
+    {/* Search Bar */}
+    <div style={styles.inputContainer}>
+      <label style={styles.label}>Search</label>
+      <input
+        style={styles.input}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+        placeholder="Search NFTs by name and description"
+      />
     </div>
-  );
-};
 
+    {/* Loading and Error Messages */}
+    {!loaded && <p>Loading...</p>}
+    {mssg && <p style={styles.message}>{mssg}</p>}
+
+    {/* NFT List */}
+    <div style={styles.nftList}>
+      {filteredNfts.length > 0 ? (
+        filteredNfts.map((nft, index) => (
+          <div key={index} style={styles.nftItem}>
+            <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
+            <h3 style={styles.nftName}>{nft.name}</h3>
+            <p style={styles.nftDescription}>{nft.description}</p>
+
+            {/* Detail Button */}
+            <button
+              style={styles.viewDetailButton}
+              onClick={() => handleViewDetail(nft)}
+            >
+              Detail
+            </button>
+
+            {/* Sell Button and Form */}
+            <button
+              style={styles.sellButton}
+              onClick={() => setSellingNft(nft.id)}
+            >
+              Sell
+            </button>
+            {sellingNft === nft.id && (
+              <div style={styles.sellForm}>
+                <input
+                  type="number"
+                  placeholder="Enter price"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  style={styles.priceInput}
+                />
+                <button
+                  onClick={() => handleSell(nft.id)}
+                  style={styles.confirmButton}
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setSellingNft(null)}
+                  style={styles.cancelButton}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        ))
+      ) : (
+        <p>No NFTs available</p>
+      )}
+    </div>
+
+    {/* Modal for NFT Details */}
+    {selectedNft && (
+      <div
+        className="modal fade show"
+        id="nftModal"
+        style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+        aria-labelledby="nftModalLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="nftModalLabel">
+                {selectedNft.name}
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                onClick={() => setSelectedNft(null)}
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <img
+                src={selectedNft.imageUrl}
+                alt={selectedNft.name}
+                style={styles.nftImage}
+              />
+              <p>{selectedNft.description}</p>
+              <p>
+                <strong>Price:</strong>{' '}
+                {selectedNft.price ? selectedNft.price : 'Not listed'}
+              </p>
+              <p>
+                <strong>Collection:</strong>{' '}
+                {selectedNft.collection ? selectedNft.collection.name : 'N/A'}
+              </p>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setSelectedNft(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+};
 const styles = {
   container: {
     width: '100%',
-    maxWidth: '800px',
+    maxWidth: '80%',
     margin: '20px auto',
     padding: '20px',
     borderRadius: '8px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     backgroundColor: '#fff',
     textAlign: 'center',
+    marginLeft: '270px'
   },
   message: {
     color: 'red',
@@ -162,9 +259,9 @@ const styles = {
     textAlign: 'center',
   },
   nftImage: {
-    width: '100%',   
-    height: '250px', 
-    objectFit: 'cover', 
+    width: '100%',
+    height: '250px',
+    objectFit: 'cover',
     borderRadius: '8px',
     marginBottom: '15px',
   },
@@ -177,6 +274,16 @@ const styles = {
   nftDescription: {
     fontSize: '1rem',
     color: '#777',
+  },
+  viewDetailButton: {
+    padding: '10px 20px',
+    // backgroundColor: 'none',
+    color: 'black',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    marginTop: '10px',
+    marginRight: '10px',
   },
   sellButton: {
     padding: '10px 20px',
@@ -211,12 +318,29 @@ const styles = {
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
-    marginLeft: '10px',
   },
-  title: {
-    color: '#00FF00',
-    fontSize: '3rem'
+  inputContainer: {
+    display: 'flex', 
+    alignItems: 'flex-start',
+    marginBottom: '20px', 
   },
-};
-
+  input: {
+    width: '250px',
+    height: '40px',
+    padding: '5px', 
+    fontSize: '16px',  
+    borderRadius: '5px', 
+    border: '1px solid #ced4da',
+    marginLeft: '10px', 
+    marginTop: '-5px', 
+    outline: 'none', 
+    transition: 'border-color 0.3s', 
+  },
+  label: {
+    fontSize: '18px', 
+    marginRight: '10px', 
+    fontWeight: 'bold', 
+     color: '#33333'
+  },
+}
 export default ListAll;

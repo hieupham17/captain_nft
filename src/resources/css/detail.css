@@ -1,0 +1,71 @@
+/* Container for NFT detail page */
+.nft-detail-container {
+    text-align: center;
+    max-width: 40%;
+    margin: 0 auto;
+    margin-left: 600px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Styling for the NFT image */
+  .nft-detail-image {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 10px;
+    margin: 20px 0;
+  }
+  
+  /* Styling for the title */
+  .nft-detail-container h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #468339;
+    
+  }
+  .nft-detail-container des {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #468339;
+    
+  }
+  
+  /* Styling for paragraphs */
+  .nft-detail-container p {
+    font-size: 1rem;
+    color: #555;
+  }
+  
+  /* Styling for the price and collection labels */
+  .nft-detail-container strong {
+    font-weight: bold;
+    color: #333;
+  }
+  .button-container {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-back {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.btn-update {
+    background-color: #007bff;
+    color: white;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+  
