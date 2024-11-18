@@ -1,275 +1,128 @@
-import { useState, useContext, useEffect } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
-import axios from "axios";
-
-import { WalletContext } from "./Context/WalletContext";
-import NftOne from "./NftOne";
-import { signAndConfirmTransaction } from "./utility/common";
-import BuyLoader from "./Loaders/BuyLoader";
-import SuccessLoaderWithClose from "./Loaders/SuccessLoaderWithClose";
-import FailedLoader from "./Loaders/FailedLoader";
-import FetchLoaderGen from "./Loaders/FetchLoaderGen";
+import React, { useState, useEffect } from 'react';
 
 const TheMarketplace = () => {
-  const navigate = useNavigate();
-  //const { waddress } = useParams();
-  const network = "devnet";
-  const [loaded, setLoaded] = useState(false);
-  const [nfts, setNfts] = useState(null);
-  const [mssg, setMssg] = useState("");
+  const [nftsForSale, setNftsForSale] = useState([]); // NFT đã được ký bán
+  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
+  const [message, setMessage] = useState(""); // Thông báo lỗi hoặc trạng thái
 
-  const { walletId, setWalletId } = useContext(WalletContext);
+  const xKey = process.env.REACT_APP_API_KEY;
 
-
-  //code for buy
-  const net = "devnet";
-  const [selWall,setSelWall] = useState();
-  const [price,setPrice] = useState(0);
-  const [nfAddr,setNfAddr] = useState('');
-
-  const [sure,setSure] = useState(false);
-  const [okModal,setOkModal] = useState(false);
-  const [failedModal,setFailedModal] = useState(false);
-  const [isBuying,setIsBuying] = useState(false);
-  const [LoadingConf,setLoadingConf] = useState(false);
-
-  const[errorMsgBuy,setErrorMsgBuy] = useState('');
-
-  const callback = (signature,result) => {
-    console.log("Signature ",signature);
-    console.log("result ",result);
-    setLoadingConf(true);
-    try {
-      if(signature.err === null)
-      {
-        console.log('ok');
-        setTimeout(() => {
-          navigate(`/wallet/${walletId}`);
-        }, 5000);
-        //navigate(`/wallet/${walletId}`);
-      }
-      else
-      {
-        console.log('failed');
-        //navigate(`/wallet/${walletId}`);
-        setFailedModal(true);
-        setLoadingConf(false);
-      }
-      setOkModal(false);
-    } catch (error) {
-      console.log('failed');
-      setOkModal(false);
-      setFailedModal(true);
-      setLoadingConf(false);
-      //navigate(`/wallet/${walletId}`);
-    }
-    
-  }
-
-
-  const buyList = (nftAddr,seller_wallet,price) => {
-    setSelWall(seller_wallet);
-    setPrice(price);
-    setNfAddr(nftAddr);
-    setErrorMsgBuy("");
-    setSure(true);
-  }
-
-  const buyNow = (nftAddr) => {
-    setIsBuying(true);
-    setSure(false);
-    const xKey = process.env.REACT_APP_API_KEY;
-        const endPoint = process.env.REACT_APP_URL_EP;
-        const marketplaceAddress = process.env.REACT_APP_MARKPLACE;
-        
-        
-        let nftUrl = `${endPoint}marketplace/buy`;
-
-        axios({
-            // Endpoint to list
-            url: nftUrl,
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-api-key": xKey,
-            },
-            data: {
-                network:'devnet',
-                marketplace_address: marketplaceAddress,
-                nft_address: nftAddr,
-                price: Number(price),
-                seller_address: selWall,
-                buyer_wallet: walletId
-                
-            }
-          })
-            // Handle the response from backend here
-            .then(async (res) => {
-              console.log(res.data);
-              setIsBuying(false);
-              if(res.data.success === true)
-              {
-                setOkModal(true);
-                const transaction = res.data.result.encoded_transaction;
-                const ret_result = await signAndConfirmTransaction('devnet',transaction,callback);
-                console.log(ret_result);
-              }
-              else
-              {
-                setErrorMsgBuy('Failed! Error Occured!');
-              }
-              
-            })
-            // Catch errors if any
-            .catch((err) => {
-              console.warn(err);
-              setErrorMsgBuy(err.message);
-              setIsBuying(false);
-              setOkModal(false);
-              setFailedModal(true);
-              // setSure(false);
-            });
-  }
-
-  const closePopupList = () => {
-    setSure(false);
-  }
-
-  // useEffect(() => {
-  //     if (!walletId) {
-  //         console.log('Wallet Not connected')
-  //         navigate('/');
-  //     }
-  //     // else {
-  //     //     setWalletId(waddress);
-  //     // }
-  // }, []);
-
-  //Required Code to fetch data from the marketplace
+  // Fetch dữ liệu NFT đã ký bán từ API
   useEffect(() => {
-      const xKey = process.env.REACT_APP_API_KEY;
-      const endPoint = process.env.REACT_APP_URL_EP;
-      const marketplaceAddress = process.env.REACT_APP_MARKPLACE; 
-      setMssg("");
-
-      let nftUrl = `${endPoint}marketplace/active_listings?network=${net}&marketplace_address=${marketplaceAddress}`;
-
-      axios({
-          // Endpoint to get NFTs
-          url: nftUrl,
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": xKey,
-          },
-        })
-          // Handle the response from backend here
-          .then((res) => {
-            console.log(res.data);
-            if(res.data.success === true)
-            {
-              setNfts(res.data.result);
-              //ReactSession.set("NumberNfts", res.data.result.length);
-            }
-            else
-            {
-                setMssg("Some Error Occured");
-                setNfts([]);
-            }
-            setLoaded(true);
-            //ReactSession.set("nfts", res.data.result);
-            //setLoaded(true);
-          })
-          // Catch errors if any
-          .catch((err) => {
-            console.warn(err);
-            setMssg(err.message);
-            setNfts([]);
-            setLoaded(true);
-          });
-  },[walletId]);
-
+    const url = 'https://api.gameshift.dev/nx/items';
+    const options = {
+      method: 'GET',
+      headers: {
+        accept: 'application/json',
+        'x-api-key': xKey
+      }
+    };
+  
+    fetch(url, options)
+      .then(res => res.json())
+      .then(json => {
+        console.log("Dữ liệu API trả về:", json); // Log toàn bộ dữ liệu API
+        if (json && json.data && Array.isArray(json.data)) {
+          const filteredNfts = json.data
+            .filter(item => {
+              console.log("Item data:", item); // Log từng item để kiểm tra
+              return (
+                item.type === 'UniqueAsset' && 
+                item.item.escrow === true &&   // Kiểm tra escrow = true
+                item.item.priceCents !== null && // Kiểm tra có priceCents hợp lệ
+                item.item.priceCents > 0  // Kiểm tra có giá trị priceCents hợp lệ
+              );
+            })
+            .map(item => ({
+              id: item.item.id,
+              name: item.item.name,
+              description: item.item.description,
+              imageUrl: item.item.imageUrl,
+              price: item.item.priceCents / 100, // Chuyển priceCents từ cents sang USD
+            }));
+  
+          console.log("NFT sau khi lọc:", filteredNfts); // Kiểm tra mảng sau khi lọc
+  
+          if (filteredNfts.length > 0) {
+            setNftsForSale(filteredNfts);
+            setLoading(false);
+          } else {
+            setMessage("No NFTs listed for sale with escrow and price.");
+            setLoading(false);
+          }
+        } else {
+          setMessage("No data found.");
+          setLoading(false);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setMessage("An error occurred while fetching data.");
+        setLoading(false);
+      });
+  }, []); 
+  
   return (
-    <div>
-      {isBuying && <FetchLoaderGen message="Buying NFT" />}
-      {LoadingConf && <FetchLoaderGen message="Loading" />}
-     {sure && <BuyLoader closePopupList={closePopupList} buyNow={buyNow} nfAddr={nfAddr} errorMsgBuy={errorMsgBuy} />}
-      {okModal && <SuccessLoaderWithClose />}
-      {failedModal && <FailedLoader closer={setFailedModal} />}
-      <div className="right-al-container mb-2">
-        <div className="container-lg">
-          <div className="marketplace-lp">
-            <h2 className="section-heading">NFT Marketplace</h2>
-            {mssg && (
-              <div className="pt-5 text-center">
-                <p className="p-para">{mssg}</p>
-              </div>
-            )}
-            
-            <div className="row mt-4">
-              {/* {loaded &&
-                nfts.map((nft) => (
-                  <div
-                    className="col-6 col-xs-6 col-sm-6 col-md-6 col-lg-4 col-xl-3 port-cust-padding"
-                    key={nft.mint}
-                  >
-                    <div className="cards-outer-port">
-                      <div className="inner-box">
-                        <Link
-                          to={`/get-details?token_address=${nft.mint}&network=${network}`}
-                          style={{ textDecoration: "none" }}
-                        >
-                          <div className="inner-box-img-container">
-                            <img src={nft.image_uri} alt="NftImage" />
-                          </div>
-                        </Link>
-                        <div className="row pt-3 pb-2">
-                          <div className="col-12 col-xl-6">
-                            <p
-                              className="port-para-2 text-center text-xl-start"
-                              style={{ wordWrap: "break-word" }}
-                            >
-                              {nft.name}
-                            </p>
-                          </div>
-                          <div className="col-12 col-xl-6 pt-1">
-                            {nft.update_authority === walletId ? (
-                              <div className="white-sm-btn-upd">
-                                <Link
-                                  className="btn linker"
-                                  to={`/update?token_address=${nft.mint}&network=${network}`}
-                                >
-                                  Update
-                                </Link>
-                              </div>
-                            ) : (
-                              <div
-                                className="white-sm-btn-upd disabled"
-                                data-bs-toggle="tooltip"
-                                title="You do not have update authority for this NFT"
-                              >
-                                <Link className="btn linker" to={`#`}>
-                                  Update
-                                </Link>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))} */}
-                
-                {loaded &&
-                nfts.map((nft) => (
-                  (nft)?<NftOne buyList={buyList} nft={nft} walletId={walletId} key={nft.nft_address}/>:""
-                ))}
+    <div style={styles.container}>
+      <h3>The Marketplace</h3>
+      
+      {loading && <p>Loading NFTs...</p>}
+      {message && <p style={styles.errorMessage}>{message}</p>}
+
+      {/* Hiển thị NFT đã ký bán */}
+      <div style={styles.nftList}>
+        {nftsForSale.length > 0 ? (
+          nftsForSale.map(nft => (
+            <div key={nft.id} style={styles.nftItem}>
+              <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
+              <h3>{nft.name}</h3>
+              <p>{nft.description}</p>
+              <p>Price: {nft.price} USDC</p>
             </div>
-          </div>
-        </div>
+          ))
+        ) : (
+          <p>No NFTs are listed for sale with escrow and price.</p>
+        )}
       </div>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    width: '100%',
+    maxWidth: '800px',
+    margin: '0 auto',
+    padding: '20px',
+    borderRadius: '8px',
+    backgroundColor: '#f5f5f5',
+    textAlign: 'center',
+  },
+  errorMessage: {
+    color: 'red',
+    fontSize: '1rem',
+    marginTop: '10px',
+  },
+  nftList: {
+    marginTop: '20px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gap: '20px',
+  },
+  nftItem: {
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+    padding: '15px',
+    backgroundColor: '#fff',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+    textAlign: 'center',
+  },
+  nftImage: {
+    width: '100%',
+    height: 'auto',
+    borderRadius: '8px',
+    marginBottom: '15px',
+  },
 };
 
 export default TheMarketplace;

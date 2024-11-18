@@ -11,8 +11,6 @@ const Create = () => {
   const xKey = process.env.REACT_APP_API_KEY;
   const { walletId } = useContext(WalletContext);
 
-  console.log("walletId:", walletId);
-
   useEffect(() => {
     if (!walletId) navigate("/connect-wallet");
   }, [walletId, navigate]);
@@ -20,7 +18,7 @@ const Create = () => {
   const [collectionId] = useState("9e42d403-aada-4ab0-aaaf-7f32d879fba2");// colletionId của bạn 
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
-  const [imageUrl, setImageUrl] = useState(""); 
+  const [imageUrl, setImageUrl] = useState("");
   const [dispFile, setDispFile] = useState(file1);
 
   const [isLoading, setloading] = useState(false);
@@ -31,6 +29,8 @@ const Create = () => {
   const [mainErr, setMainErr] = useState("");
   const [compleMint, setComMinted] = useState(false);
   const [minted, setMinted] = useState(null);
+
+  const [itemId, setItemId] = useState(null);
 
   const callback = (signature, result) => {
     console.log("Signature ", signature);
@@ -51,20 +51,20 @@ const Create = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    setMainErr(""); 
-
+    setMainErr("");
+  
     // Kiểm tra các trường bắt buộc
     if (!name || !desc || !imageUrl) {
       setMainErr("Vui lòng điền đầy đủ thông tin");
       return;
     }
-
+  
     // Kiểm tra URL hợp lệ
     if (!isValidUrl(imageUrl)) {
       setFileErr("Vui lòng nhập một URL hợp lệ.");
       return;
     }
-
+  
     // Kiểm tra các trường nhập liệu khác
     if (name.trim() === "") {
       setNameErr("Tên không được để trống.");
@@ -74,17 +74,17 @@ const Create = () => {
       setDescErr("Mô tả không được để trống.");
       return;
     }
-
+  
     const jsonPayload = {
       details: {
         collectionId: collectionId,
         description: desc,
-        imageUrl: imageUrl, 
+        imageUrl: imageUrl,
         name: name,
       },
       destinationUserReferenceId: walletId,
     };
-
+  
     // Cấu hình request
     const options = {
       method: "POST",
@@ -95,22 +95,37 @@ const Create = () => {
       },
       body: JSON.stringify(jsonPayload),
     };
-
+  
     setloading(true); // Bắt đầu loading
-
+  
     try {
-      const response = await fetch("https://api.gameshift.dev/nx/unique-assets", options);
+      const response = await fetch(
+        "https://api.gameshift.dev/nx/unique-assets",
+        options
+      );
       const json = await response.json();
-
+      console.log("Full Response JSON: ", json);
+  
+      if (json.id) {
+        setItemId(json.id); // Lưu id
+        console.log("NFT ID: ", json.id); // Log id để kiểm tra
+  
+        // Lưu ID vào localStorage
+        localStorage.setItem('nftId', json.id); // Lưu id vào localStorage
+  
+      } else {
+        console.error("ID không tồn tại trong phản hồi:", json);
+        setMainErr("API không trả về ID.");
+      }
+  
       if (json.success) {
         const transaction = json.result.encoded_transaction;
         setMinted(json.result.mint);
-        signAndConfirmTransaction(transaction, callback).then(
-          (ret_result) => {
-            setSuccessful(true);
-            setloading(false);
-          }
-        );
+  
+        signAndConfirmTransaction(transaction, callback).then((ret_result) => {
+          setSuccessful(true);
+          setloading(false);
+        });
       } else {
         setMainErr(json.message);
         setloading(false);
@@ -121,6 +136,7 @@ const Create = () => {
       setloading(false);
     }
   };
+  
 
   // Hàm kiểm tra URL hợp lệ
   const isValidUrl = (url) => {
@@ -149,7 +165,11 @@ const Create = () => {
                 <div className="image-section">
                   <div className="image-container">
                     <div className="inner">
-                      <img className="img-fluid" src={imageUrl || dispFile} alt="" />
+                      <img
+                        className="img-fluid"
+                        src={imageUrl || dispFile}
+                        alt=""
+                      />
                     </div>
                   </div>
                 </div>
@@ -229,10 +249,7 @@ const Create = () => {
                     </div>
 
                     <div className="white-form-group">
-                      <button
-                        className="btn-solid-grad px-5"
-                        type="submit"
-                      >
+                      <button className="btn-solid-grad px-5" type="submit">
                         Submit
                       </button>
                     </div>
@@ -249,4 +266,3 @@ const Create = () => {
 };
 
 export default Create;
-
