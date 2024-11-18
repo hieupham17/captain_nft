@@ -17,7 +17,7 @@ const Create = () => {
     if (!walletId) navigate("/connect-wallet");
   }, [walletId, navigate]);
 
-  const [collectionId] = useState("a8d8a064-1a47-47e5-99cd-9c1beb683907");// colletionId của bạn 
+  const [collectionId] = useState("9e42d403-aada-4ab0-aaaf-7f32d879fba2");// colletionId của bạn 
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
   const [imageUrl, setImageUrl] = useState(""); 
