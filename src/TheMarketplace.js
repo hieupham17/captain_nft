@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Connection, PublicKey } from '@solana/web3.js';
 
 const TheMarketplace = () => {
   const [nftsForSale, setNftsForSale] = useState([]); 
@@ -9,7 +8,6 @@ const TheMarketplace = () => {
   const [isWalletConnected, setIsWalletConnected] = useState(false); 
   const xKey = process.env.REACT_APP_API_KEY;
 
-  
   const checkPhantomWallet = async () => {
     if (window.solana && window.solana.isPhantom) {
       try {
@@ -56,7 +54,7 @@ const TheMarketplace = () => {
               name: item.item.name,
               description: item.item.description,
               imageUrl: item.item.imageUrl,
-              price: item.item.priceCents , 
+              price: item.item.priceCents /100, 
             }));
   
           console.log("NFT sau khi lọc:", filteredNfts); 
@@ -92,7 +90,7 @@ const TheMarketplace = () => {
       method: 'POST',
       headers: {
         accept: 'application/json',
-        'x-api-key': process.env.REACT_APP_API_KEY, // Lấy từ env hoặc hardcode
+        'x-api-key': xKey, 
         'content-type': 'application/json'
       },
       body: JSON.stringify({ buyerId: buyerId }) 
@@ -103,7 +101,6 @@ const TheMarketplace = () => {
       .then(json => {
         console.log("Mua thành công:", json);
         if (json.transactionId && json.consentUrl) {
-          // Chuyển hướng người dùng đến trang consentUrl để ký mua
           window.location.href = json.consentUrl;
         } else {
           setMessage("An error occurred while processing the purchase.");
@@ -115,21 +112,49 @@ const TheMarketplace = () => {
       });
   };
 
+  // Hàm hủy liên kết NFT
+  const handleCancelListing = (itemId) => {
+    const url = `https://api.gameshift.dev/nx/unique-assets/${itemId}/cancel-listing`;
+    const options = {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'x-api-key': xKey
+      }
+    };
+
+    fetch(url, options)
+      .then(res => res.json())
+      .then(json => {
+        console.log("Hủy thành công:", json);
+        setMessage("Listing cancelled successfully.");
+        // Cập nhật lại danh sách NFT sau khi hủy
+        window.location.href = json.consentUrl;
+        setNftsForSale(nftsForSale.filter(nft => nft.id !== itemId));
+      })
+      .catch(err => {
+        console.error(err);
+        setMessage("An error occurred while cancelling the listing.");
+      });
+  };
+
   return (
     <div style={styles.container}>
       <h3>The Marketplace</h3>
       {loading && <p>Loading NFTs...</p>}
       {message && <p style={styles.errorMessage}>{message}</p>}
+  
       {/* Hiển thị NFT đã ký bán */}
       <div style={styles.nftList}>
         {nftsForSale.length > 0 ? (
           nftsForSale.map(nft => (
             <div key={nft.id} style={styles.nftItem}>
               <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
-              <h3>{nft.name}</h3>
-              <p>{nft.description}</p>
-              <p>Price: {nft.price} USDC</p>
-              {/* <p><strong>ID:</strong> {nft.id}</p> */}
+              <div style={styles.nftDetails}>
+                <h3>{nft.name}</h3>
+                <p>{nft.description}</p>
+                <p>Price: {nft.price} USDC</p>
+              </div>
               {/* Nút mua */}
               <button 
                 onClick={() => handleBuyNFT(nft.id)} 
@@ -137,19 +162,25 @@ const TheMarketplace = () => {
               >
                 Buy
               </button>
+              {/* Nút hủy liên kết */}
+              <button 
+                onClick={() => handleCancelListing(nft.id)} 
+                style={styles.cancelButton}
+              >
+                Cancel Listing
+              </button>
             </div>
           ))
         ) : (
           <p>No NFTs are listed for sale with escrow and price.</p>
         )}
       </div>
-
       {/* Nút kết nối ví Phantom */}
       <button onClick={checkPhantomWallet} style={styles.connectButton}>
         {isWalletConnected ? 'Wallet Connected' : 'Connect Phantom Wallet'}
       </button>
     </div>
-  );
+  );  
 };
 
 const styles = {
@@ -180,12 +211,19 @@ const styles = {
     backgroundColor: '#fff',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
     textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height: 'auto', 
   },
   nftImage: {
     width: '100%',
     height: 'auto',
     borderRadius: '8px',
     marginBottom: '15px',
+  },
+  nftDetails: {
+    flex: '1', 
   },
   buyButton: {
     padding: '10px 15px',
@@ -195,16 +233,27 @@ const styles = {
     borderRadius: '5px',
     cursor: 'pointer',
     marginTop: '10px',
+    width: '100%',
+  },
+  cancelButton: {
+    padding: '10px 15px',
+    backgroundColor: '#f44336',
+    color: 'white',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    marginTop: '10px',
+    width: '100%',
   },
   connectButton: {
     padding: '10px 20px',
-    backgroundColor: '#ff9b00',
+    backgroundColor: '#008CBA',
     color: 'white',
     border: 'none',
     borderRadius: '5px',
     cursor: 'pointer',
     marginTop: '20px',
-  },
+  }
 };
 
 export default TheMarketplace;
