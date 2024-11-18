@@ -4,6 +4,8 @@ const ListAll = () => {
   const [nfts, setNfts] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [mssg, setMssg] = useState("");
+  const [sellingNft, setSellingNft] = useState(null); // NFT đang được bán
+  const [price, setPrice] = useState(''); // Giá nhập vào
 
   const xKey = process.env.REACT_APP_API_KEY;
 
@@ -20,13 +22,11 @@ const ListAll = () => {
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
-        console.log(json); // Log json data to check structure
-
-        // Lọc các tài sản có type là "UniqueAsset"
         if (json && json.data && Array.isArray(json.data)) {
           const filteredNfts = json.data
             .filter(item => item.type === 'UniqueAsset') // Lọc chỉ những tài sản UniqueAsset
             .map(item => ({
+              id: item.item.id,
               name: item.item.name,
               description: item.item.description,
               imageUrl: item.item.imageUrl
@@ -49,22 +49,82 @@ const ListAll = () => {
         setMssg("An error occurred while fetching data.");
         setLoaded(true);
       });
-  }, []); // Empty dependency array to run this effect only once
+  }, []);
+
+  // Hàm xử lý API bán NFT
+  const handleSell = (nftId) => {
+    const url = `https://api.gameshift.dev/nx/unique-assets/${nftId}/list-for-sale`;
+    const options = {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'x-api-key': xKey,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({ price: { currencyId: 'USDC', naturalAmount: price } })
+    };
+  
+    fetch(url, options)
+      .then(res => res.json())
+      .then(json => {
+        console.log(json);
+        if (json.consentUrl) {
+          // Điều hướng đến consentUrl
+          window.location.href = json.consentUrl;
+  
+          // Sau khi điều hướng và ký bán, xóa NFT khỏi danh sách
+          setNfts((prevNfts) => prevNfts.filter((nft) => nft.id !== nftId));
+        } else {
+          alert("Asset is already listed for sale");
+        }
+        setSellingNft(null); // Đóng form sau khi xử lý xong
+        setPrice(''); // Reset giá
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Failed to list NFT for sale.");
+      });
+  };
+  
+  
 
   return (
     <div style={styles.container}>
       <h3 style={styles.title}>My NFts</h3>
-      {!loaded && <p>Loading...</p>} {/* Show loading message until data is fetched */}
-      {mssg && <p style={styles.message}>{mssg}</p>} {/* Show message if there's an error or no data */}
+      {!loaded && <p>Loading...</p>}
+      {mssg && <p style={styles.message}>{mssg}</p>}
 
       <div style={styles.nftList}>
-        {console.log(nfts)} {/* Log nfts data for debugging */}
         {nfts.length > 0 ? (
           nfts.map((nft, index) => (
             <div key={index} style={styles.nftItem}>
               <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
               <h3 style={styles.nftName}>{nft.name}</h3>
               <p style={styles.nftDescription}>{nft.description}</p>
+              {/* <p><strong>ID:</strong> {nft.id}</p> */}
+              <button
+                style={styles.sellButton}
+                onClick={() => setSellingNft(nft.id)} // Mở form bán
+              >
+                Sell
+              </button>
+              {sellingNft === nft.id && (
+                <div style={styles.sellForm}>
+                  <input
+                    type="number"
+                    placeholder="Enter price"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    style={styles.priceInput}
+                  />
+                  <button onClick={() => handleSell(nft.id)} style={styles.confirmButton}>
+                    Confirm
+                  </button>
+                  <button onClick={() => setSellingNft(null)} style={styles.cancelButton}>
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           ))
         ) : (
@@ -105,8 +165,9 @@ const styles = {
     textAlign: 'center',
   },
   nftImage: {
-    width: '100%',
-    height: 'auto',
+    width: '100%',   
+    height: '250px', 
+    objectFit: 'cover', 
     borderRadius: '8px',
     marginBottom: '15px',
   },
@@ -120,10 +181,45 @@ const styles = {
     fontSize: '1rem',
     color: '#777',
   },
+  sellButton: {
+    padding: '10px 20px',
+    backgroundColor: '#007BFF',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    marginTop: '10px',
+  },
+  sellForm: {
+    marginTop: '10px',
+  },
+  priceInput: {
+    padding: '5px',
+    marginRight: '10px',
+    borderRadius: '5px',
+    border: '1px solid #ddd',
+  },
+  confirmButton: {
+    padding: '5px 10px',
+    backgroundColor: '#28a745',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+  },
+  cancelButton: {
+    padding: '5px 10px',
+    backgroundColor: '#dc3545',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '5px',
+    cursor: 'pointer',
+    marginLeft: '10px',
+  },
   title: {
     color: '#00FF00',
     fontSize: '3rem'
-  }
+  },
 };
 
 export default ListAll;
