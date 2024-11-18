@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Connection, PublicKey } from '@solana/web3.js';
 
 const TheMarketplace = () => {
-  const [nftsForSale, setNftsForSale] = useState([]); // NFT đã được ký bán
-  const [loading, setLoading] = useState(true); // Trạng thái tải dữ liệu
-  const [message, setMessage] = useState(""); // Thông báo lỗi hoặc trạng thái
-  const [buyerId, setBuyerId] = useState(''); // Giả sử bạn đã có buyerId từ ví Phantom
-  const [isWalletConnected, setIsWalletConnected] = useState(false); // Trạng thái ví kết nối
+  const [nftsForSale, setNftsForSale] = useState([]); 
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(""); 
+  const [buyerId, setBuyerId] = useState(''); 
+  const [isWalletConnected, setIsWalletConnected] = useState(false); 
   const xKey = process.env.REACT_APP_API_KEY;
 
-  // Kiểm tra kết nối ví Phantom và lấy địa chỉ ví
+  
   const checkPhantomWallet = async () => {
     if (window.solana && window.solana.isPhantom) {
       try {
-        const response = await window.solana.connect(); // Kết nối ví Phantom
-        setBuyerId(response.publicKey.toString()); // Lưu địa chỉ ví vào buyerId
-        setIsWalletConnected(true); // Đánh dấu ví đã được kết nối
+        const response = await window.solana.connect(); 
+        setBuyerId(response.publicKey.toString()); 
+        setIsWalletConnected(true); 
         setMessage("Wallet connected.");
       } catch (err) {
         setMessage("Please connect your Phantom wallet.");
@@ -39,16 +39,16 @@ const TheMarketplace = () => {
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
-        console.log("Dữ liệu API trả về:", json); // Log toàn bộ dữ liệu API
+        console.log("Dữ liệu API trả về:", json); 
         if (json && json.data && Array.isArray(json.data)) {
           const filteredNfts = json.data
             .filter(item => {
-              console.log("Item data:", item); // Log từng item để kiểm tra
+              console.log("Item data:", item); 
               return (
                 item.type === 'UniqueAsset' && 
-                item.item.escrow === true &&   // Kiểm tra escrow = true
-                item.item.priceCents !== null && // Kiểm tra có priceCents hợp lệ
-                item.item.priceCents > 0  // Kiểm tra có giá trị priceCents hợp lệ
+                item.item.escrow === true &&   
+                item.item.priceCents !== null && 
+                item.item.priceCents > 0  
               );
             })
             .map(item => ({
@@ -56,10 +56,10 @@ const TheMarketplace = () => {
               name: item.item.name,
               description: item.item.description,
               imageUrl: item.item.imageUrl,
-              price: item.item.priceCents / 100, // Chuyển priceCents từ cents sang USD
+              price: item.item.priceCents , 
             }));
   
-          console.log("NFT sau khi lọc:", filteredNfts); // Kiểm tra mảng sau khi lọc
+          console.log("NFT sau khi lọc:", filteredNfts); 
   
           if (filteredNfts.length > 0) {
             setNftsForSale(filteredNfts);
@@ -95,7 +95,7 @@ const TheMarketplace = () => {
         'x-api-key': process.env.REACT_APP_API_KEY, // Lấy từ env hoặc hardcode
         'content-type': 'application/json'
       },
-      body: JSON.stringify({ buyerId: buyerId }) // Gửi buyerId từ ví người dùng
+      body: JSON.stringify({ buyerId: buyerId }) 
     };
 
     fetch(url, options)
@@ -118,10 +118,8 @@ const TheMarketplace = () => {
   return (
     <div style={styles.container}>
       <h3>The Marketplace</h3>
-      
       {loading && <p>Loading NFTs...</p>}
       {message && <p style={styles.errorMessage}>{message}</p>}
-
       {/* Hiển thị NFT đã ký bán */}
       <div style={styles.nftList}>
         {nftsForSale.length > 0 ? (

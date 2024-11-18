@@ -86,8 +86,6 @@ const ListAll = () => {
       });
   };
   
-  
-
   return (
     <div style={styles.container}>
       <h3 style={styles.title}>My NFTs</h3>
