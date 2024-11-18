@@ -19,17 +19,12 @@ import Update from './UpdateComponent';
 import NavBarComponent from './headerComponent/NavBarComponent';
 import Footer from './footerComponent/footer';
 import ConnectWalletCreate from './ConnectWalletCreate';
-// import MarketplaceCreator from './MarketplaceCreator';
 import TheMarketplace from './TheMarketplace';
-// import Transactions from './Transactions';
-// import ListedNFTs from './ListedNfts';
 import TransactionsMaster from './TransactionsMaster';
 import StatsMaster from './StatsMaster';
 import MyListingsMaster from './MyListingsMaster';
 import Statistics from './Statistics';
 import TransferMaster from './TransferMaster';
-
-// import Wallet from './Wallet';
 
 function App() {
     const [walletId, setWalletId] = useState(null);
@@ -55,7 +50,6 @@ function App() {
                 <Route exact path="/get-details" element={<GetDetails />} />
                 <Route exact path="/create" element={<Create />} />
                 <Route exact path="/update" element={<Update />} />
-                {/* <Route exact path="/mark" element={<MarketplaceCreator />} /> */}
                 <Route exact path="/marketplace" element={<TheMarketplace />} />
                 <Route exact path="/transactions" element={<TransactionsMaster />} />
                 <Route exact path="/my-listings" element={<MyListingsMaster />} />

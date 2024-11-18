@@ -7,6 +7,8 @@ import { ReactSession } from "react-client-session";
 const ConnectWallet = () => {
     const navigate = useNavigate();
     const { setWalletId } = useContext(WalletContext);
+    const xKey = process.env.REACT_APP_API_KEY;
+
 
     const solanaConnect = async () => {
         try {
@@ -31,7 +33,7 @@ const ConnectWallet = () => {
                 method: 'GET',
                 headers: {
                     accept: 'application/json',
-                    'x-api-key': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiI4MzUzMDc0NC0zMDVlLTRhMzAtOTVkMi1mMjRhOTYzNDIzMTIiLCJzdWIiOiIwZGFhZDYxYi05NGYxLTRjZGMtODk1ZS1iMGE0MTliMjBlNTIiLCJpYXQiOjE3MzEzOTk0NjZ9.1oHCpFqI5OkjOH2GK9EyQTU6oo9ii6GsXfOybq7M7xM'
+                    'x-api-key': xKey
                 }
             };
 
