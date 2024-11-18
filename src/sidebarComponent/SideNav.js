@@ -18,19 +18,12 @@ const SideNav = () => {
   const { walletId, setWalletId } = useContext(WalletContext);
   const { solDomainsApp, setSolDomainApp } = useContext(DomainContext);
   const location_get = useLocation();
-<<<<<<< HEAD
-
-  const navigate = useNavigate();
-  const [isOpen, setOpen] = useState(true);
-
-=======
   const navigate = useNavigate();
   const [isOpen, setOpen] = useState(true);
 
     const xKey = process.env.REACT_APP_API_KEY;
 
 
->>>>>>> d9720906d03e3b1c5d7c7f4aa3677b553fdd185f
   const openNav = () => {
     document.getElementById("mySidenav").style.width = "250px";
     setOpen(false);
