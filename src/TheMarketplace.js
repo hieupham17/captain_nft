@@ -131,6 +131,7 @@ const TheMarketplace = () => {
               <h3>{nft.name}</h3>
               <p>{nft.description}</p>
               <p>Price: {nft.price} USDC</p>
+              {/* <p><strong>ID:</strong> {nft.id}</p> */}
               {/* Nút mua */}
               <button 
                 onClick={() => handleBuyNFT(nft.id)} 

@@ -18,6 +18,7 @@ const ListAll = () => {
         'x-api-key': xKey
       }
     };
+    console.log("Current NFTs state:", nfts);
 
     fetch(url, options)
       .then(res => res.json())
@@ -31,7 +32,6 @@ const ListAll = () => {
               description: item.item.description,
               imageUrl: item.item.imageUrl
             }));
-
           if (filteredNfts.length > 0) {
             setNfts(filteredNfts);
             setLoaded(true);
@@ -50,6 +50,7 @@ const ListAll = () => {
         setLoaded(true);
       });
   }, []);
+  
 
   // Hàm xử lý API bán NFT
   const handleSell = (nftId) => {
@@ -71,14 +72,13 @@ const ListAll = () => {
         if (json.consentUrl) {
           // Điều hướng đến consentUrl
           window.location.href = json.consentUrl;
-  
-          // Sau khi điều hướng và ký bán, xóa NFT khỏi danh sách
-          setNfts((prevNfts) => prevNfts.filter((nft) => nft.id !== nftId));
+          // Chỉ sau khi xác nhận thành công thì loại bỏ NFT khỏi danh sách
+          setNfts(prevNfts => prevNfts.filter(nft => nft.id !== nftId));
         } else {
           alert("Asset is already listed for sale");
         }
-        setSellingNft(null); // Đóng form sau khi xử lý xong
-        setPrice(''); // Reset giá
+        setSellingNft(null); 
+        setPrice(''); 
       })
       .catch(err => {
         console.error(err);
@@ -90,7 +90,7 @@ const ListAll = () => {
 
   return (
     <div style={styles.container}>
-      <h3 style={styles.title}>My NFts</h3>
+      <h3 style={styles.title}>My NFTs</h3>
       {!loaded && <p>Loading...</p>}
       {mssg && <p style={styles.message}>{mssg}</p>}
 
@@ -101,7 +101,6 @@ const ListAll = () => {
               <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
               <h3 style={styles.nftName}>{nft.name}</h3>
               <p style={styles.nftDescription}>{nft.description}</p>
-              {/* <p><strong>ID:</strong> {nft.id}</p> */}
               <button
                 style={styles.sellButton}
                 onClick={() => setSellingNft(nft.id)} // Mở form bán
