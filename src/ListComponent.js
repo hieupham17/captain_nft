@@ -6,11 +6,11 @@ const ListAll = () => {
   const [nfts, setNfts] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [mssg, setMssg] = useState("");
-  const [sellingNft, setSellingNft] = useState(null); // NFT đang được bán
-  const [price, setPrice] = useState(''); // Giá nhập vào
-  const [selectedNft, setSelectedNft] = useState(null); // NFT chi tiết
+  const [sellingNft, setSellingNft] = useState(null); 
+  const [price, setPrice] = useState(''); 
+  const [selectedNft, setSelectedNft] = useState(null); 
 
-  const [searchTerm, setSearchTerm] = useState(""); // State for search input
+  const [searchTerm, setSearchTerm] = useState(""); 
 
   const xKey = process.env.REACT_APP_API_KEY;
   const navigate = useNavigate();
@@ -74,7 +74,6 @@ const ListAll = () => {
       },
       body: JSON.stringify({ price: { currencyId: 'USDC', naturalAmount: price } })
     };
-
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
@@ -110,7 +109,7 @@ return (
       <input
         style={styles.input}
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+        onChange={(e) => setSearchTerm(e.target.value)} 
         placeholder="Search NFTs by name and description"
       />
     </div>

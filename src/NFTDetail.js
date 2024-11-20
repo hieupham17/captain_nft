@@ -7,11 +7,11 @@ const NFTDetail = () => {
     const [nft, setNft] = useState(null);
     const [ownerEmail, setOwnerEmail] = useState(null);  // New state for owner's email
     const [loading, setLoading] = useState(true);
-    const xKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiIyOTQxMDA4MC1kYWRhLTRlMDAtYTIyZC0xMTVmY2JhZWNjNjAiLCJzdWIiOiIzOTBjNDU2My02YzYzLTRiMjMtYTA0ZS05ZmE5YzcxZjUzNTkiLCJpYXQiOjE3MzE1Njg5NTF9.DB5_pKpEjuYv6T5v22cMy-ZKKUiCVXnZ3YLmhmO5Wrw';
+    const xKey = process.env.REACT_APP_API_KEY;
 
     const navigate = useNavigate(); // Initialize the navigate function
 
-    // Fetch NFT details and owner email
+   
     useEffect(() => {
         const fetchNftDetail = async () => {
             try {
@@ -37,7 +37,6 @@ const NFTDetail = () => {
                             'x-api-key': xKey,
                         },
                     });
-
                     if (!ownerResponse.ok) throw new Error('Failed to fetch owner email');
                     const ownerData = await ownerResponse.json();
                     setOwnerEmail(ownerData.email);  // Set owner's email
