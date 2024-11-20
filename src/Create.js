@@ -85,7 +85,6 @@ const Create = () => {
       destinationUserReferenceId: walletId,
     };
   
-    // Cấu hình request
     const options = {
       method: "POST",
       headers: {
@@ -107,20 +106,20 @@ const Create = () => {
       console.log("Full Response JSON: ", json);
   
       if (json.id) {
-        setItemId(json.id); // Lưu id
-        console.log("NFT ID: ", json.id); // Log id để kiểm tra
-        // Lưu ID vào localStorage
-        localStorage.setItem('nftId', json.id); // Lưu id vào localStorage
+        setItemId(json.id);
+        localStorage.setItem("nftId", json.id);
+        alert("NFT đã được tạo thành công!"); // Thông báo thành công
       } else {
         console.error("ID không tồn tại trong phản hồi:", json);
         setMainErr("API không trả về ID.");
+        alert("Tạo NFT thất bại, vui lòng thử lại."); // Thông báo thất bại
       }
   
       if (json.success) {
         const transaction = json.result.encoded_transaction;
         setMinted(json.result.mint);
   
-        signAndConfirmTransaction(transaction, callback).then((ret_result) => {
+        signAndConfirmTransaction(transaction, callback).then(() => {
           setSuccessful(true);
           setloading(false);
         });
@@ -131,9 +130,11 @@ const Create = () => {
     } catch (error) {
       console.warn(error);
       setMainErr("Đã có lỗi xảy ra, vui lòng thử lại.");
+      alert("Đã xảy ra lỗi trong quá trình tạo NFT."); // Thông báo lỗi
       setloading(false);
     }
   };
+  
   
 
   // Hàm kiểm tra URL hợp lệ
