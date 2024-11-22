@@ -1,0 +1,61 @@
+.form-update {
+    width: 50%;
+    margin: 0 auto; /* Canh giữa */
+    margin-left: 500px;
+    padding: 20px;
+    background-color: #f9f9f9; /* Màu nền nhạt */
+    border: 1px solid #ccc; /* Viền mờ */
+    border-radius: 8px; /* Bo góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng */
+}
+
+.form-update h2 {
+    text-align: center; /* Canh giữa tiêu đề */
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.form-update label {
+    display: block;
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.form-update input,
+.form-update textarea {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+}
+
+.form-update input:focus,
+.form-update textarea:focus {
+    border-color: #007bff; /* Màu viền khi focus */
+    outline: none;
+}
+
+.form-update button {
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff; /* Màu xanh của nút */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-update button:hover {
+    background-color: #0056b3; /* Màu tối hơn khi hover */
+}
+
+.form-update button:active {
+    background-color: #003d80; /* Màu tối hơn khi bấm giữ */
+}

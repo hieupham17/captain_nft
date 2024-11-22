@@ -59,7 +59,11 @@ const ListAll = () => {
 
   const handleViewDetail = (nft) => {
     navigate(`/nft-detail/${nft.id}`);
-};
+  };
+  const handleUpdate = (nft) => {
+    navigate(`/update/${nft.id}`, { state: { nft } }); // Điều hướng sang trang cập nhật với dữ liệu NFT
+  };
+  
 
 
   // Hàm xử lý API bán NFT
@@ -85,147 +89,154 @@ const ListAll = () => {
         } else {
           alert("Asset is already listed for sale");
         }
-        setSellingNft(null); 
-        setPrice(''); 
+        setSellingNft(null);
+        setPrice('');
       })
       .catch(err => {
         console.error(err);
         alert("Failed to list NFT for sale.");
       });
   };
- // Filter NFTs based on search term
- const filteredNfts = nfts.filter(
-  (nft) =>
-    nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    nft.description.toLowerCase().includes(searchTerm.toLowerCase())
-);
+  // Filter NFTs based on search term
+  const filteredNfts = nfts.filter(
+    (nft) =>
+      nft.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      nft.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-return (
-  <div style={styles.container}>
-    <h3 style={styles.title}>My NFTs</h3>
+  return (
+    <div style={styles.container}>
+      <h3 style={styles.title}>My NFTs</h3>
 
-    {/* Search Bar */}
-    <div style={styles.inputContainer}>
-      <label style={styles.label}>Search</label>
-      <input
-        style={styles.input}
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-        placeholder="Search NFTs by name and description"
-      />
-    </div>
+      {/* Search Bar */}
+      <div style={styles.inputContainer}>
+        <label style={styles.label}>Search</label>
+        <input
+          style={styles.input}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+          placeholder="Search NFTs by name and description"
+        />
+      </div>
 
-    {/* Loading and Error Messages */}
-    {!loaded && <p>Loading...</p>}
-    {mssg && <p style={styles.message}>{mssg}</p>}
+      {/* Loading and Error Messages */}
+      {!loaded && <p>Loading...</p>}
+      {mssg && <p style={styles.message}>{mssg}</p>}
 
-    {/* NFT List */}
-    <div style={styles.nftList}>
-      {filteredNfts.length > 0 ? (
-        filteredNfts.map((nft, index) => (
-          <div key={index} style={styles.nftItem}>
-            <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
-            <h3 style={styles.nftName}>{nft.name}</h3>
-            <p style={styles.nftDescription}>{nft.description}</p>
+      {/* NFT List */}
+      <div style={styles.nftList}>
+        {filteredNfts.length > 0 ? (
+          filteredNfts.map((nft, index) => (
+            <div key={index} style={styles.nftItem}>
+              <img src={nft.imageUrl} alt={nft.name} style={styles.nftImage} />
+              <h3 style={styles.nftName}>{nft.name}</h3>
+              <p style={styles.nftDescription}>{nft.description}</p>
 
-            {/* Detail Button */}
-            <button
-              style={styles.viewDetailButton}
-              onClick={() => handleViewDetail(nft)}
-            >
-              Detail
-            </button>
+              {/* Detail Button */}
+              <button
+                style={styles.viewDetailButton}
+                onClick={() => handleViewDetail(nft)}
+              >
+                Detail
+              </button>
+              {/* Update Button */}
+              <button
+                style={styles.updateButton} // Add styling for the Update button
+                onClick={() => handleUpdate(nft)} // Call the update handler function
+              >
+                Update
+              </button>
 
-            {/* Sell Button and Form */}
-            <button
-              style={styles.sellButton}
-              onClick={() => setSellingNft(nft.id)}
-            >
-              Sell
-            </button>
-            {sellingNft === nft.id && (
-              <div style={styles.sellForm}>
-                <input
-                  type="number"
-                  placeholder="Enter price"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  style={styles.priceInput}
+              {/* Sell Button and Form */}
+              <button
+                style={styles.sellButton}
+                onClick={() => setSellingNft(nft.id)}
+              >
+                Sell
+              </button>
+              {sellingNft === nft.id && (
+                <div style={styles.sellForm}>
+                  <input
+                    type="number"
+                    placeholder="Enter price"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    style={styles.priceInput}
+                  />
+                  <button
+                    onClick={() => handleSell(nft.id)}
+                    style={styles.confirmButton}
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => setSellingNft(null)}
+                    style={styles.cancelButton}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+          ))
+        ) : (
+          <p>No NFTs available</p>
+        )}
+      </div>
+
+      {/* Modal for NFT Details */}
+      {selectedNft && (
+        <div
+          className="modal fade show"
+          id="nftModal"
+          style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
+          aria-labelledby="nftModalLabel"
+          aria-hidden="true"
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title" id="nftModalLabel">
+                  {selectedNft.name}
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setSelectedNft(null)}
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <img
+                  src={selectedNft.imageUrl}
+                  alt={selectedNft.name}
+                  style={styles.nftImage}
                 />
+                <p>{selectedNft.description}</p>
+                <p>
+                  <strong>Price:</strong>{' '}
+                  {selectedNft.price ? selectedNft.price : 'Not listed'}
+                </p>
+                <p>
+                  <strong>Collection:</strong>{' '}
+                  {selectedNft.collection ? selectedNft.collection.name : 'N/A'}
+                </p>
+              </div>
+              <div className="modal-footer">
                 <button
-                  onClick={() => handleSell(nft.id)}
-                  style={styles.confirmButton}
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setSelectedNft(null)}
                 >
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setSellingNft(null)}
-                  style={styles.cancelButton}
-                >
-                  Cancel
+                  Close
                 </button>
               </div>
-            )}
-          </div>
-        ))
-      ) : (
-        <p>No NFTs available</p>
-      )}
-    </div>
-
-    {/* Modal for NFT Details */}
-    {selectedNft && (
-      <div
-        className="modal fade show"
-        id="nftModal"
-        style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
-        aria-labelledby="nftModalLabel"
-        aria-hidden="true"
-      >
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title" id="nftModalLabel">
-                {selectedNft.name}
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => setSelectedNft(null)}
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="modal-body">
-              <img
-                src={selectedNft.imageUrl}
-                alt={selectedNft.name}
-                style={styles.nftImage}
-              />
-              <p>{selectedNft.description}</p>
-              <p>
-                <strong>Price:</strong>{' '}
-                {selectedNft.price ? selectedNft.price : 'Not listed'}
-              </p>
-              <p>
-                <strong>Collection:</strong>{' '}
-                {selectedNft.collection ? selectedNft.collection.name : 'N/A'}
-              </p>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={() => setSelectedNft(null)}
-              >
-                Close
-              </button>
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
 
 };
 const styles = {
@@ -320,27 +331,27 @@ const styles = {
     cursor: 'pointer',
   },
   inputContainer: {
-    display: 'flex', 
+    display: 'flex',
     alignItems: 'flex-start',
-    marginBottom: '20px', 
+    marginBottom: '20px',
   },
   input: {
     width: '250px',
     height: '40px',
-    padding: '5px', 
-    fontSize: '16px',  
-    borderRadius: '5px', 
+    padding: '5px',
+    fontSize: '16px',
+    borderRadius: '5px',
     border: '1px solid #ced4da',
-    marginLeft: '10px', 
-    marginTop: '-5px', 
-    outline: 'none', 
-    transition: 'border-color 0.3s', 
+    marginLeft: '10px',
+    marginTop: '-5px',
+    outline: 'none',
+    transition: 'border-color 0.3s',
   },
   label: {
-    fontSize: '18px', 
-    marginRight: '10px', 
-    fontWeight: 'bold', 
-     color: '#33333'
+    fontSize: '18px',
+    marginRight: '10px',
+    fontWeight: 'bold',
+    color: '#33333'
   },
 }
 export default ListAll;
