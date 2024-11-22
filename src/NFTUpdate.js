@@ -46,7 +46,10 @@ const NFTUpdate = () => {
             setIsLoading(false); // Ẩn loader ngay nếu có lỗi
         }
     };
-
+    const idWallet = '5UpHhzCqZmfiJp8zjnz1qy22BjYmfRu5PbyPupqCVigh';
+    const handleBack = () => {
+        navigate('/wallet/' + idWallet);
+    };
     if (isLoading) {
         return <SuccessLoader />; // Hiển thị loader nếu đang tải
     }
@@ -81,7 +84,9 @@ const NFTUpdate = () => {
                     ></textarea>
                 </label>
                 <br />
-                <button onClick={handleUpdate}>Update</button>
+                <button onClick={handleUpdate} className="btn btn-update">Update</button>
+                <button onClick={handleBack} className="btn btn-back">Back</button>
+
             </form>
         </div>
     );
