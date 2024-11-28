@@ -29,9 +29,11 @@ const ListAll = () => {
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
+        console.log(json);
         if (json && json.data && Array.isArray(json.data)) {
           const filteredNfts = json.data
-            .filter(item => item.type === 'UniqueAsset')
+            .filter(item => item.type === 'UniqueAsset' && item.item.priceCents === null && 
+              item.item.owner?.address === 'kRRjGmLeMUGBJbtW57wQ2gUy6GzyV4zNJwUAFtBUHfS')
             .map(item => ({
               id: item.item.id,
               name: item.item.name,
