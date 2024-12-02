@@ -37,11 +37,9 @@ const TheMarketplace = () => {
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
-        console.log("Dữ liệu API trả về:", json); 
         if (json && json.data && Array.isArray(json.data)) {
           const filteredNfts = json.data
             .filter(item => {
-              console.log("Item data:", item); 
               return (
                 item.type === 'UniqueAsset' && 
                 item.item.escrow === true &&   

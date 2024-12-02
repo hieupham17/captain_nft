@@ -9,14 +9,14 @@ const NFTUpdate = () => {
 
     const nft = location.state?.nft || {};
     const nftId = nft.id || '';
+    const xKey = process.env.REACT_APP_API_KEY;
+
 
     // State quản lý dữ liệu và hiển thị loader
     const [imageUrl, setImageUrl] = useState(nft.imageUrl || '');
     const [name, setName] = useState(nft.name || '');
     const [description, setDescription] = useState(nft.description || '');
     const [isLoading, setIsLoading] = useState(false); // Thêm trạng thái loader
-
-    const xKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXkiOiIyOTQxMDA4MC1kYWRhLTRlMDAtYTIyZC0xMTVmY2JhZWNjNjAiLCJzdWIiOiIzOTBjNDU2My02YzYzLTRiMjMtYTA0ZS05ZmE5YzcxZjUzNTkiLCJpYXQiOjE3MzE1Njg5NTF9.DB5_pKpEjuYv6T5v22cMy-ZKKUiCVXnZ3YLmhmO5Wrw';
 
     const handleUpdate = async () => {
         setIsLoading(true); // Hiển thị loader
@@ -46,7 +46,7 @@ const NFTUpdate = () => {
             setIsLoading(false); // Ẩn loader ngay nếu có lỗi
         }
     };
-    const idWallet = '5UpHhzCqZmfiJp8zjnz1qy22BjYmfRu5PbyPupqCVigh';
+    const idWallet = 'kRRjGmLeMUGBJbtW57wQ2gUy6GzyV4zNJwUAFtBUHfS';
     const handleBack = () => {
         navigate('/wallet/' + idWallet);
     };
