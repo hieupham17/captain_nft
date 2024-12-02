@@ -37,44 +37,45 @@ const TheMarketplace = () => {
     fetch(url, options)
       .then(res => res.json())
       .then(json => {
+        console.log("Dữ liệu trả về từ API:", json);
+  
         if (json && json.data && Array.isArray(json.data)) {
           const filteredNfts = json.data
-            .filter(item => {
-              return (
-                item.type === 'UniqueAsset' && 
-                item.item.escrow === true &&   
-                item.item.priceCents !== null && 
-                item.item.priceCents > 0  
-              );
-            })
+            .filter(item => 
+              item.type === 'UniqueAsset' && 
+              item.item.forSale === true &&  // Đã được ký bán
+              item.item.price?.naturalAmount && // Có giá
+              parseFloat(item.item.price.naturalAmount) > 0 // Giá trị > 0
+            )
             .map(item => ({
               id: item.item.id,
               name: item.item.name,
               description: item.item.description,
               imageUrl: item.item.imageUrl,
-              price: item.item.priceCents /100, 
+              price: parseFloat(item.item.price.naturalAmount), // Chuyển đổi giá trị sang số
             }));
   
-          console.log("NFT sau khi lọc:", filteredNfts); 
+          console.log("NFTs đã lọc:", filteredNfts);
   
           if (filteredNfts.length > 0) {
             setNftsForSale(filteredNfts);
             setLoading(false);
           } else {
-            setMessage("No NFTs listed for sale with escrow and price.");
+            setMessage("Không có NFTs nào được ký bán với giá.");
             setLoading(false);
           }
         } else {
-          setMessage("No data found.");
+          setMessage("Không tìm thấy dữ liệu.");
           setLoading(false);
         }
       })
       .catch(err => {
-        console.error(err);
-        setMessage("An error occurred while fetching data.");
+        console.error("Lỗi khi gọi API:", err);
+        setMessage("Đã xảy ra lỗi khi lấy dữ liệu.");
         setLoading(false);
       });
-  }, []); 
+  }, []);
+  
 
   // Hàm mua NFT
   const handleBuyNFT = (itemId) => {
