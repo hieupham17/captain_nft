@@ -25,7 +25,9 @@ import MyListingsMaster from './MyListingsMaster';
 import Statistics from './Statistics';
 import TransferMaster from './TransferMaster';
 import NFTDetail from './NFTDetail';
-import NFTUpdate from './NFTUpdate'; // Adjust the path based on your project structure
+import NFTUpdate from './NFTUpdate';
+import Login from './login';
+import RegisterUser from './RegisterUser';
 
 function App() {
     const [walletId, setWalletId] = useState(null);
@@ -57,6 +59,8 @@ function App() {
                   <Route exact path="/transfer" element={<TransferMaster />} />
                   <Route path="/nft-detail/:nftId" element={<NFTDetail />} />
                   <Route path="/update/:nftId" element={<NFTUpdate />} />
+                  <Route exact path="/login" element={<Login />} />
+                  <Route exact path="/register" element={<RegisterUser />} />
                   <Route exact path="*" element={<ConnectWallet />} />
                 </Routes>
                 <Footer />
