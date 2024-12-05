@@ -105,6 +105,48 @@ const RegisterAccount = () => {
                 </div>
             </div>
         </div>
+// // Định nghĩa mô hình người dùng
+// const userSchema = new mongoose.Schema({
+//     name: { type: String, required: true },
+//     email: { type: String, required: true, unique: true },
+//     password: { type: String, required: true }
+// });
+
+// const User = mongoose.model('User', userSchema);
+
+// // Endpoint đăng ký
+// app.post('/register', async (req, res) => {
+//     try {
+//         const { name, email, password } = req.body;
+
+//         // Kiểm tra thông tin
+//         if (!name || !email || !password) {
+//             return res.status(400).json({ error: 'Missing required fields' });
+//         }
+
+//         // Kiểm tra email đã tồn tại
+//         const existingUser = await User.findOne({ email });
+//         if (existingUser) {
+//             return res.status(400).json({ error: 'Email da duoc su dung' });
+//         }
+
+//         // Mã hóa mật khẩu
+//         const hashedPassword = await bcrypt.hash(password, 10);
+
+//         // Tạo người dùng mới
+//         const newUser = new User({
+//             name,
+//             email,
+//             password: hashedPassword
+//         });
+//         await newUser.save();
+
+//         res.status(201).json({ message: 'User registered successfully!' });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Server error' });
+//     }
+// });
     );
 };
 
